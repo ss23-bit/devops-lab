@@ -1,0 +1,14 @@
+# Python Virtual Environments
+venv/
+.venv/
+env/
+__pycache__/
+*.py[cod]
+
+# Docker
+.docker/
+*.log
+
+# Windows/OS specific
+.DS_Store
+Thumbs.db
