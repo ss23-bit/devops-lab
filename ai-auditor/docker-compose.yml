@@ -1,0 +1,24 @@
+
+services:
+  # 1. The Database (The Pantry)
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: agoda_admin
+      POSTGRES_PASSWORD: supersecretpassword
+      POSTGRES_DB: agoda_db
+    ports:
+      - "5432:5432"
+
+  # 2. The API (The Chef)
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.fixed
+    ports:
+      - "8000:8000"
+    environment:
+      # We tell the API how to find the DB using the service name 'db'
+      DATABASE_URL: "postgresql://agoda_admin:supersecretpassword@db:5432/agoda_db"
+    depends_on:
+      - db

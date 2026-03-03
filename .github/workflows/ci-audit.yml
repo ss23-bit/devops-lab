@@ -1,0 +1,29 @@
+name: Security Audit & Build Test
+
+on: [push]
+
+jobs:
+  audit-and-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install Dependencies
+        run: pip install google-generativeai
+
+      - name: Run AI Security Auditor
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        # Note the path: ai-auditor/script.py and app-cluster/Dockerfile
+        run: python ai-auditor/ai_reviewer.py app-cluster/Dockerfile
+
+      - name: Build Docker Image (Dry Run)
+        working-directory: ./app-cluster
+        run: docker compose build

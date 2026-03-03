@@ -1,0 +1,35 @@
+
+FROM python:3.9-slim
+
+WORKDIR /app
+
+# Install Gunicorn. Using --no-cache-dir to prevent pip from storing
+# downloaded packages, reducing the final image size.
+# psycopg2-binary is the tool Python uses to speak "Postgres"
+RUN pip install --no-cache-dir flask gunicorn psycopg2-binary
+
+# Create a non-root system user named 'agoda_user'.
+# --system creates a system account with no home directory by default,
+# which is suitable for application users.
+# --no-create-home explicitly prevents creating a home directory.
+RUN addgroup --system agoda_group && adduser --system --group --no-create-home agoda_user
+
+# Copy application code into the /app directory.
+COPY app.py /app
+
+# Set ownership of the /app directory and its contents to agoda_user.
+# This ensures the non-root user has necessary permissions for the application files.
+RUN chown -R agoda_user:agoda_group /app
+
+# Switch to the non-root user to run the application.
+# This enhances security by not running the application as root.
+USER agoda_user
+
+# Tell Docker which port the app uses
+EXPOSE 8000
+
+# Command to run the application using Gunicorn.
+# This assumes there is an 'app.py' file in the /app directory
+# that contains a WSGI callable named 'app' (e.g., a Flask or Django application instance).
+# Gunicorn binds to all network interfaces on port 8000.
+CMD ["gunicorn", "-b", "0.0.0.0:8000", "app:app"]
